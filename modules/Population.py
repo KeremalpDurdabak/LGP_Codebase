@@ -163,3 +163,53 @@ class Population:
             registers[:, target] *= 2
         elif operator == 3:
             registers[:, target] = registers[:, target] / 2 if np.all(registers[:, target] != 0) else 0
+
+    def get_best_instruction_count(self):
+        best_idx = np.argmax(self.fitness)
+        return np.count_nonzero(self.target_index[:, best_idx] != -1)
+
+    def get_best_class_accuracies(self):
+        best_idx = np.argmax(self.fitness)
+        true_labels = np.argmax(Dataset.y, axis=1)
+        predicted_labels = self.get_predicted_labels(best_idx)
+        
+        unique_labels = np.unique(true_labels)
+        class_accuracies = []
+        
+        for label in unique_labels:
+            correct_preds = np.sum((predicted_labels == label) & (true_labels == label))
+            total_instances = np.sum(true_labels == label)
+            
+            if total_instances > 0:
+                accuracy = (correct_preds / total_instances) * 100
+                class_accuracies.append(accuracy)
+            else:
+                class_accuracies.append(None)
+        
+        return class_accuracies
+
+
+
+
+    def get_predicted_labels(self, individual_idx):
+        true_labels = np.argmax(Dataset.y, axis=1)
+        registers = np.zeros((Dataset.X.shape[0], Parameter.register_count))
+
+        for ins_idx in range(Parameter.max_instruction):
+            if self.target_index[ins_idx, individual_idx] == -1:
+                break
+
+            target = self.target_index[ins_idx, individual_idx]
+            operator = self.operator_select[ins_idx, individual_idx]
+            source_index = self.source_index[ins_idx, individual_idx]
+            source_selector = self.source_select[ins_idx, individual_idx]
+
+            if source_selector == 0:
+                source_value = registers[:, source_index % Parameter.register_count]
+            elif source_selector == 1:
+                source_value = Dataset.X[:, source_index % Dataset.X.shape[1]]
+
+            self.apply_operator(target, operator, source_value, registers)
+
+        predicted_labels = np.argmax(registers[:, :Dataset.y.shape[1]], axis=1)
+        return predicted_labels
