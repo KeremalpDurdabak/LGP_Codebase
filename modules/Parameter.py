@@ -7,7 +7,7 @@ class Parameter:
     population_count = 100
 
     # Max Instruction (Row) per each Individual
-    max_instruction = 32
+    max_instruction = 16
 
     # Max number per each decode instruction (Source Select, Target Index, Source Index)
     # (Max number for the 'operator_select' is dynamically assumed by the OperatorSet class)
@@ -20,10 +20,10 @@ class Parameter:
     register_count = 4
 
     # Percentage of worst fit Individuals to replace
-    gap_percentage = 0.3
+    gap_percentage = 0.2
 
     # Generation Count
     generations = 1000
 
     # Probability of a Mutation
-    mutation_prob = 0.3
+    mutation_prob = 0.2
