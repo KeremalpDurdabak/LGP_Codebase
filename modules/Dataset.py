@@ -9,6 +9,7 @@ class Dataset:
     X_test = None
     y_train = None
     y_test = None
+    unique_labels = None
 
     @staticmethod
     def one_hot_encode(arr):
@@ -30,6 +31,7 @@ class Dataset:
     @staticmethod
     def set_iris():
         X, y = Dataset.load_csv('datasets/iris/iris.data', float)
+        Dataset.unique_labels = np.unique(y)
         y = Dataset.one_hot_encode(y)
         Dataset.shuffle_data(X,y)
         Dataset.X_train, Dataset.X_test, Dataset.y_train, Dataset.y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -38,7 +40,7 @@ class Dataset:
     def set_thyroiddisease():
         # Load the dataset
         X, y = Dataset.load_csv('datasets/thyroid+disease/ann-train.data', float)
-
+        Dataset.unique_labels = np.unique(y)
         # One-hot encode the labels using your custom method
         y = Dataset.one_hot_encode(y)
 
@@ -52,7 +54,7 @@ class Dataset:
     def set_statlogshuttle():
         # Load the dataset
         X, y = Dataset.load_csv('datasets/statlog+shuttle/shuttle.trn', int)
-
+        Dataset.unique_labels = np.unique(y)
         # One-hot encode the labels using your custom method
         y = Dataset.one_hot_encode(y)
 
@@ -77,6 +79,7 @@ class Dataset:
     @staticmethod
     def set_tictactoe():
         X, y = Dataset.load_csv('datasets/tic+tac+toe+endgame/tic-tac-toe.data', str)
+        Dataset.unique_labels = np.unique(y)
         X = Dataset.label_encode(X)
         y = Dataset.one_hot_encode(y)
         Dataset.shuffle_data(X,y)

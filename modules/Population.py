@@ -215,8 +215,9 @@ class Population:
         print('Calculating best individual fitness on the test dataset...')
         best_idx = np.argmax(self.fitness)
         true_labels_test = np.argmax(Dataset.y_test, axis=1)  # Reverse one-hot encoding
-        unique_labels = np.unique(true_labels_test)
+        unique_labels = Dataset.unique_labels  # Use the unique labels from Dataset
         registers = np.zeros((Dataset.X_test.shape[0], Parameter.register_count))
+
 
         for ins_idx in range(Parameter.max_instruction):
             if self.target_index[ins_idx, best_idx] == -1:
@@ -241,7 +242,7 @@ class Population:
 
         # Calculate class-wise accuracy
         for label in unique_labels:
-            mask = (true_labels_test == label)
+            mask = (true_labels_test == np.where(unique_labels == label)[0][0])  # Map label to its index
             class_count = np.sum(mask)
             correct_class_count = np.sum(predicted_labels_test[mask] == true_labels_test[mask])
             class_accuracy = (correct_class_count / class_count) * 100
