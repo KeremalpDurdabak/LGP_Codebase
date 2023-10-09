@@ -7,6 +7,7 @@ from modules.Display import Display
 def main():
     dataset = Dataset()
     dataset.set_iris()
+    #Dataset.resample_data(heuristic=1, tau=200)
 
     population = Population()
     population.initialize()
@@ -27,6 +28,9 @@ def main():
         # Collect data for new graphs
         best_class_accuracies = population.get_best_class_accuracies()
         Display.best_class_accuracies.append(best_class_accuracies)
+
+        #if generation % 10 == 0:
+        #    Dataset.resample_data(heuristic=1, tau=200)  # You can switch the heurist
 
         # Parent Selection -> Variation Operators (Crossover, Mutation) -> Child Replacement
         population.generate_next_gen()
