@@ -1,10 +1,13 @@
 import csv
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
 
 class Dataset:
-    X = None
-    y = None
+    X_train = None
+    X_test = None
+    y_train = None
+    y_test = None
 
     @staticmethod
     def one_hot_encode(arr):
@@ -27,19 +30,16 @@ class Dataset:
     def set_iris():
         X, y = Dataset.load_csv('datasets/iris/iris.data', float)
         y = Dataset.one_hot_encode(y)
-        Dataset.X, Dataset.y = Dataset.shuffle_data(X, y)
+        Dataset.shuffle_data(X,y)
+        Dataset.X_train, Dataset.X_test, Dataset.y_train, Dataset.y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     @staticmethod
     def set_tictactoe():
         X, y = Dataset.load_csv('datasets/tic+tac+toe+endgame/tic-tac-toe.data', str)
-        
-        # Label encode the features using the generic method
         X = Dataset.label_encode(X)
-
-        # One-hot encode the target label
         y = Dataset.one_hot_encode(y)
-
-        Dataset.X, Dataset.y = Dataset.shuffle_data(X, y)
+        Dataset.shuffle_data(X,y)
+        Dataset.X_train, Dataset.X_test, Dataset.y_train, Dataset.y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     @staticmethod
     def load_csv(path, dtype):
@@ -60,3 +60,4 @@ class Dataset:
                 y.append(label)
 
         return np.array(X), np.array(y)
+

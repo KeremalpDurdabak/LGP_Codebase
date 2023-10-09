@@ -12,8 +12,6 @@ def main():
     population.initialize()
 
 
-    #TODO IMPLEMENT TEST DATASET AND TEST FITNESS FOR THE BEST INDIVIDUAL!
-
     for generation in range(1, Parameter.generations + 1):
 
         population.compute_generation_fitness()
@@ -33,9 +31,11 @@ def main():
         # Parent Selection -> Variation Operators (Crossover, Mutation) -> Child Replacement
         population.generate_next_gen()
 
+    #Compute best individual's score on the test dataset
+    population.compute_best_individual_test_fitness()
+    
     # Display overall metrics as graphs    
     Display.report_overall_performance()
-
 
 if __name__ == "__main__":
     main()

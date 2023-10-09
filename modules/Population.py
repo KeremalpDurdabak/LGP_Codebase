@@ -19,12 +19,12 @@ class Population:
             self.source_select[instruction_count, col] = -1
 
     def compute_generation_fitness(self):
-        true_labels = np.argmax(Dataset.y, axis=1)
+        true_labels = np.argmax(Dataset.y_train, axis=1)
         self.fitness = np.zeros(Parameter.population_count)
 
         for col in range(Parameter.population_count):
             # Note: No need to copy Dataset.X into registers here, as we use modulus to index Dataset.X when needed
-            registers = np.zeros((Dataset.X.shape[0], Parameter.register_count))
+            registers = np.zeros((Dataset.X_train.shape[0], Parameter.register_count))
 
             for ins_idx in range(Parameter.max_instruction):
                 if self.target_index[ins_idx, col] == -1:
@@ -38,11 +38,11 @@ class Population:
                 if source_selector == 0:
                     source_value = registers[:, source_index % Parameter.register_count]
                 elif source_selector == 1:
-                    source_value = Dataset.X[:, source_index] #% Dataset.X.shape[1]]
+                    source_value = Dataset.X_train[:, source_index] #% Dataset.X.shape[1]]
 
                 self.apply_operator(target, operator, source_value, registers)
 
-            predicted_labels = np.argmax(registers[:, :Dataset.y.shape[1]], axis=1)
+            predicted_labels = np.argmax(registers[:, :Dataset.y_train.shape[1]], axis=1)
             self.fitness[col] = np.sum(predicted_labels == true_labels)
 
 
@@ -112,10 +112,10 @@ class Population:
        # Compute only the new children's fitness
         new_fitness = np.zeros(new_children_count)
         
-        true_labels = np.argmax(Dataset.y, axis=1)
+        true_labels = np.argmax(Dataset.y_train, axis=1)
         
         for i, col in enumerate(worst_indices):
-            registers = np.zeros((Dataset.X.shape[0], Parameter.register_count))
+            registers = np.zeros((Dataset.X_train.shape[0], Parameter.register_count))
 
             for ins_idx in range(Parameter.max_instruction):
                 if self.target_index[ins_idx, col] == -1:
@@ -129,12 +129,12 @@ class Population:
                 if source_selector == 0:
                     source_value = registers[:, self.source_index[ins_idx, col] % Parameter.register_count]
                 elif source_selector == 1:
-                    source_value = Dataset.X[:, self.source_index[ins_idx, col] % Dataset.X.shape[1]]
+                    source_value = Dataset.X_train[:, self.source_index[ins_idx, col] % Dataset.X_train.shape[1]]
 
 
                 self.apply_operator(target, operator, source_value, registers)
 
-            predicted_labels = np.argmax(registers[:, :Dataset.y.shape[1]], axis=1)
+            predicted_labels = np.argmax(registers[:, :Dataset.y_train.shape[1]], axis=1)
             new_fitness[i] = np.sum(predicted_labels == true_labels)
         
         # Step 4: Replace the worst individuals with new children
@@ -170,7 +170,7 @@ class Population:
 
     def get_best_class_accuracies(self):
         best_idx = np.argmax(self.fitness)
-        true_labels = np.argmax(Dataset.y, axis=1)
+        true_labels = np.argmax(Dataset.y_train, axis=1)
         predicted_labels = self.get_predicted_labels(best_idx)
         
         unique_labels = np.unique(true_labels)
@@ -188,12 +188,9 @@ class Population:
         
         return class_accuracies
 
-
-
-
     def get_predicted_labels(self, individual_idx):
-        true_labels = np.argmax(Dataset.y, axis=1)
-        registers = np.zeros((Dataset.X.shape[0], Parameter.register_count))
+        true_labels = np.argmax(Dataset.y_train, axis=1)
+        registers = np.zeros((Dataset.X_train.shape[0], Parameter.register_count))
 
         for ins_idx in range(Parameter.max_instruction):
             if self.target_index[ins_idx, individual_idx] == -1:
@@ -207,9 +204,44 @@ class Population:
             if source_selector == 0:
                 source_value = registers[:, source_index % Parameter.register_count]
             elif source_selector == 1:
-                source_value = Dataset.X[:, source_index % Dataset.X.shape[1]]
+                source_value = Dataset.X_train[:, source_index % Dataset.X_train.shape[1]]
 
             self.apply_operator(target, operator, source_value, registers)
 
-        predicted_labels = np.argmax(registers[:, :Dataset.y.shape[1]], axis=1)
+        predicted_labels = np.argmax(registers[:, :Dataset.y_train.shape[1]], axis=1)
         return predicted_labels
+
+    def compute_best_individual_test_fitness(self):
+        best_idx = np.argmax(self.fitness)
+        true_labels_test = np.argmax(Dataset.y_test, axis=1)  # Reverse one-hot encoding
+        unique_labels = np.unique(true_labels_test)
+        registers = np.zeros((Dataset.X_test.shape[0], Parameter.register_count))
+
+        for ins_idx in range(Parameter.max_instruction):
+            if self.target_index[ins_idx, best_idx] == -1:
+                break
+
+            target = self.target_index[ins_idx, best_idx]
+            operator = self.operator_select[ins_idx, best_idx]
+            source_index = self.source_index[ins_idx, best_idx]
+            source_selector = self.source_select[ins_idx, best_idx]
+
+            if source_selector == 0:
+                source_value = registers[:, source_index % Parameter.register_count]
+            elif source_selector == 1:
+                source_value = Dataset.X_test[:, source_index % Dataset.X_test.shape[1]]
+
+            self.apply_operator(target, operator, source_value, registers)
+
+        predicted_labels_test = np.argmax(registers[:, :Dataset.y_test.shape[1]], axis=1)
+        overall_test_fitness = np.sum(predicted_labels_test == true_labels_test) / len(true_labels_test) * 100
+
+        print(f"Best Individual Test Fitness: {overall_test_fitness:.2f}%")
+
+        # Calculate class-wise accuracy
+        for label in unique_labels:
+            mask = (true_labels_test == label)
+            class_count = np.sum(mask)
+            correct_class_count = np.sum(predicted_labels_test[mask] == true_labels_test[mask])
+            class_accuracy = (correct_class_count / class_count) * 100
+            print(f"Accuracy for class {label}: {class_accuracy:.2f}%")

@@ -17,7 +17,7 @@ class Display:
         mean_fitness_raw = np.mean(population.fitness)
         worst_fitness_raw = np.min(population.fitness)
         
-        total_instances = len(Dataset.X)
+        total_instances = len(Dataset.X_train)
         
         best_fitness_percentage = (best_fitness_raw / total_instances) * 100
         mean_fitness_percentage = (mean_fitness_raw / total_instances) * 100
@@ -36,12 +36,11 @@ class Display:
 
     @classmethod
     def report_all_individuals(cls, generation, population):
-        total_instances = len(Dataset.X)
+        total_instances = len(Dataset.X_train)
         fitness_percentages = (population.fitness / total_instances) * 100
         sorted_fitness_percentages = np.sort(fitness_percentages)[::-1]  # Sort in descending order
         
         print(f"All Fitness Scores (Sorted): {['{:.2f}%'.format(x) for x in sorted_fitness_percentages]}")
-
 
 
     @classmethod
