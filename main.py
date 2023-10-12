@@ -6,7 +6,7 @@ from modules.Display import Display
 
 def main():
     dataset = Dataset()
-    dataset.set_iris()
+    dataset.set_thyroiddisease()
     #Dataset.resample_data(heuristic=1, tau=200)
 
     population = Population()
@@ -30,7 +30,7 @@ def main():
         Display.best_class_accuracies.append(best_class_accuracies)
 
         #if generation % 10 == 0:
-        #    Dataset.resample_data(heuristic=1, tau=200)  # You can switch the heurist
+            #Dataset.resample_data(heuristic=2, tau=200)  # You can switch the heurist
 
         # Parent Selection -> Variation Operators (Crossover, Mutation) -> Child Replacement
         population.generate_next_gen()

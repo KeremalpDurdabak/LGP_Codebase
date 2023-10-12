@@ -38,8 +38,7 @@ class Dataset:
 
     @staticmethod
     def set_thyroiddisease():
-        # Load the dataset
-        X, y = Dataset.load_csv('datasets/thyroid+disease/ann-train.data', float)
+        X, y = Dataset.load_csv('datasets/thyroid+disease/ann-train.data', float, delimiter=' ', skip_trailing_spaces=2)
         Dataset.unique_labels = np.unique(y)
         # One-hot encode the labels using your custom method
         y = Dataset.one_hot_encode(y)
@@ -52,8 +51,7 @@ class Dataset:
 
     @staticmethod
     def set_statlogshuttle():
-        # Load the dataset
-        X, y = Dataset.load_csv('datasets/statlog+shuttle/shuttle.trn', int)
+        X, y = Dataset.load_csv('datasets/statlog+shuttle/shuttle.trn', int, delimiter=' ')
         Dataset.unique_labels = np.unique(y)
         # One-hot encode the labels using your custom method
         y = Dataset.one_hot_encode(y)
@@ -86,15 +84,17 @@ class Dataset:
         Dataset.X_train, Dataset.X_test, Dataset.y_train, Dataset.y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     @staticmethod
-    def load_csv(path, dtype):
+    def load_csv(path, dtype, delimiter=',', skip_trailing_spaces=0):
         X = []
         y = []
         with open(path, 'r') as file:
-            csv_reader = csv.reader(file)
-            # No header skipping here
-            for row in csv_reader:
-                if len(row) == 0:
-                    continue  # Skip empty rows
+            for line in file:
+                line = line.rstrip()  # Remove trailing newlines
+                if not line:  # Skip empty lines
+                    continue
+                if skip_trailing_spaces > 0:
+                    line = line[:-skip_trailing_spaces]  # Remove extra trailing spaces
+                row = line.split(delimiter)
                 if len(row) < 2:
                     raise ValueError(f"Row doesn't have enough columns: {row}")
 
@@ -109,6 +109,8 @@ class Dataset:
                 y.append(label)
 
         return np.array(X), np.array(y)
+
+
 
 
     @staticmethod

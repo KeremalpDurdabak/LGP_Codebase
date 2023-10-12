@@ -29,7 +29,7 @@ class Display:
         formatted_accuracies = [f"{x:.2f}" if x is not None else "None" for x in best_class_accuracies]
         
         unique_labels = Dataset.unique_labels  # Use this line to get unique labels
-        print(f"Class-wise accuracies: {dict(zip(unique_labels, formatted_accuracies))}")
+        #print(f"Class-wise accuracies: {dict(zip(unique_labels, formatted_accuracies))}")
                 
         cls.best_individuals.append(best_fitness_percentage)
         cls.mean_individuals.append(mean_fitness_percentage)
