@@ -26,7 +26,10 @@ class Display:
         print(f"Generation {generation} Best Individual: {best_fitness_percentage:.2f}%")
         
         best_class_accuracies = population.get_best_class_accuracies()
-        formatted_accuracies = [f"{x:.2f}" if x is not None else "None" for x in best_class_accuracies]
+        for label, accuracy in best_class_accuracies.items():
+            print(f"Accuracy for class {label}: {accuracy:.2f}%")
+
+        #formatted_accuracies = [f"{x:.2f}" if x is not None else "None" for x in best_class_accuracies]
         
         unique_labels = Dataset.unique_labels  # Use this line to get unique labels
         #print(f"Class-wise accuracies: {dict(zip(unique_labels, formatted_accuracies))}")
@@ -62,13 +65,8 @@ class Display:
         # Graph 2
         plt.subplot(3, 1, 2)
         class_accuracies = np.array(cls.best_class_accuracies)
-        unique_labels = Dataset.unique_labels  # Use this line to get unique labels
-        for i, label in enumerate(unique_labels):
-            plt.plot(class_accuracies[:, i], label=f'{label}')  # Use label instead of Class {i}
-        plt.title('Class Accuracies of Best Individual')
-        plt.xlabel('Generation')
-        plt.ylabel('Accuracy')
-        plt.legend()
+        for i, label in enumerate(Dataset.unique_labels):
+            plt.plot(class_accuracies[:, i], label=f'{label}')
 
         # Graph 3
         plt.subplot(3, 1, 3)

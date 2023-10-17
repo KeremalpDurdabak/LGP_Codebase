@@ -17,6 +17,7 @@ class Dataset:
         element_to_one_hot = {elem: np.eye(len(unique_elements))[i] for i, elem in enumerate(unique_elements)}
         return np.array([element_to_one_hot[elem] for elem in arr])
 
+
     @staticmethod
     def label_encode(arr):
         le = LabelEncoder()
@@ -89,7 +90,7 @@ class Dataset:
         y = []
         with open(path, 'r') as file:
             for line in file:
-                line = line.rstrip()  # Remove trailing newlines
+                line = line.strip('\n')  # Remove only the newline character
                 if not line:  # Skip empty lines
                     continue
                 if skip_trailing_spaces > 0:
@@ -131,6 +132,12 @@ class Dataset:
                 cls_indices = np.where(np.argmax(Dataset.y_train, axis=1) == cls)[0]
                 sampled_indices = resample(cls_indices, n_samples=per_class_count, replace=len(cls_indices) < per_class_count)
                 indices.extend(sampled_indices)
+
         Dataset.X_train = Dataset.X_train[indices]
         Dataset.y_train = Dataset.y_train[indices]
 
+        # Check for missing classes after resampling
+        sampled_classes = np.unique(np.argmax(Dataset.y_train, axis=1))
+        missing_classes = [cls for cls in unique_classes if cls not in sampled_classes]
+        if missing_classes:
+            print(f"Warning: Missing classes after resampling: {missing_classes}")

@@ -173,8 +173,8 @@ class Population:
         true_labels = np.argmax(Dataset.y_train, axis=1)
         predicted_labels = self.get_predicted_labels(best_idx)
         
-        unique_labels = np.unique(true_labels)
-        class_accuracies = []
+        unique_labels = Dataset.unique_labels  # Use the static unique labels
+        class_accuracies = {label: 0 for label in unique_labels}  # Initialize with zeros
         
         for label in unique_labels:
             correct_preds = np.sum((predicted_labels == label) & (true_labels == label))
@@ -182,11 +182,14 @@ class Population:
             
             if total_instances > 0:
                 accuracy = (correct_preds / total_instances) * 100
-                class_accuracies.append(accuracy)
             else:
-                class_accuracies.append(None)
-        
+                accuracy = 0  # or None, if you prefer
+            
+            class_accuracies[label] = accuracy  # Populate based on label
+
         return class_accuracies
+
+
 
     def get_predicted_labels(self, individual_idx):
         true_labels = np.argmax(Dataset.y_train, axis=1)
